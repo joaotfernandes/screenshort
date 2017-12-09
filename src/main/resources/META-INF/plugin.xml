@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>com.github.joaotfernandes</id>
+    <name>screenshort</name>
+    <version>1.0</version>
+    <vendor email="jtfernandes93@gmail.com" url="https://github.com/joaotfernandes">Joao Fernandes</vendor>
+
+    <description><![CDATA[
+      TODO.<br>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Release 1.0: TODO.<br>
+    ]]>
+    </change-notes>
+
+    <idea-version since-build="162"/>
+
+    <depends>com.intellij.modules.androidstudio</depends>
+    <depends>org.jetbrains.android</depends>
+
+    <extensions defaultExtensionNs="com.intellij" />
+</idea-plugin>
