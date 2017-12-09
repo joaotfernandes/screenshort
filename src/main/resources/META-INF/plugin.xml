@@ -19,4 +19,7 @@
     <depends>org.jetbrains.android</depends>
 
     <extensions defaultExtensionNs="com.intellij" />
+    <actions>
+        <action id="TakeScreenshot" class="com.github.joaotfernandes.TakeScreenshotAction" text="Take screenshot"/>
+    </actions>
 </idea-plugin>
