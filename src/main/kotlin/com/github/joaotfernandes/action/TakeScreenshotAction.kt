@@ -35,12 +35,19 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
         val device = getSelectedDevice(project)
 
         ApplicationManager.getApplication().executeOnPooledThread {
-            val dstFile = getDstFile(project)
-            device?.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)
+            try {
+                val dstFile = getDstFile(project)
+                device?.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)
 
-            NotificationManager.dispatchInfoNotification(
-                    Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
-                    notificationListener = NotificationListener.URL_OPENING_LISTENER)
+                NotificationManager.dispatchInfoNotification(
+                        Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
+                        notificationListener = NotificationListener.URL_OPENING_LISTENER)
+            } catch (throwable: Throwable) {
+                // Catch all exceptions that can occur when taking a screenshot and display an error notification
+                NotificationManager.dispatchErrorNotification(
+                        Notification.SCREENSHOT_FAILURE.getBody(throwable.message),
+                        notificationListener = NotificationListener.URL_OPENING_LISTENER)
+            }
         }
     }
 
