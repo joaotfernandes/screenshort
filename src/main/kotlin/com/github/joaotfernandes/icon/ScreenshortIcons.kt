@@ -1,4 +1,4 @@
-package com.github.joaotfernandes
+package com.github.joaotfernandes.icon
 
 import com.intellij.openapi.util.IconLoader
 
