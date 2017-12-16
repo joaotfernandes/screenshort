@@ -7,7 +7,8 @@ package com.github.joaotfernandes.notification
  */
 enum class Notification(private val body: String) {
 
-    SCREENSHOT_SUCCESS("<a href='%s'>Open screenshot</a> or <a href='%s'>reveal screenshot</a>");
+    SCREENSHOT_SUCCESS("<a href='%s'>Open screenshot</a> or <a href='%s'>reveal screenshot</a>"),
+    SCREENSHOT_FAILURE("Ah snap! Something went wrong. Please try again");
 
     /**
      * Returns the notification body formatted with [args], if any present.
