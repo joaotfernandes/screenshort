@@ -32,22 +32,24 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
 
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
-        val device = getSelectedDevice(project)
 
-        ApplicationManager.getApplication().executeOnPooledThread {
-            try {
-                val dstFile = getDstFile(project)
-                device?.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)
-
-                NotificationManager.dispatchInfoNotification(
-                        Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
-                        notificationListener = NotificationListener.URL_OPENING_LISTENER)
-            } catch (throwable: Throwable) {
-                // Catch all exceptions that can occur when taking a screenshot and display an error notification
-                NotificationManager.dispatchErrorNotification(
-                        Notification.SCREENSHOT_FAILURE.getBody(throwable.message),
-                        notificationListener = NotificationListener.URL_OPENING_LISTENER)
+        try {
+            val device = getSelectedDevice(project)
+            if (device != null) {
+                ApplicationManager.getApplication().executeOnPooledThread {
+                    val dstFile = getDstFile(project)
+                    device.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)?.let {
+                        NotificationManager.dispatchInfoNotification(
+                                Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
+                                notificationListener = NotificationListener.URL_OPENING_LISTENER)
+                    }
+                }
             }
+        } catch (throwable: Throwable) {
+            // Catch all exceptions that can occur when taking a screenshot and display an error notification
+            NotificationManager.dispatchErrorNotification(
+                    Notification.SCREENSHOT_FAILURE.getBody(throwable.message),
+                    notificationListener = NotificationListener.URL_OPENING_LISTENER)
         }
     }
 
@@ -67,15 +69,19 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
      * so a device can be selected, otherwise the only device connected is returned.
      *
      * @return selected device or null if no device was selected
+     * @throws [IllegalStateException] if project configurations can't be retrieved at this time
      */
     private fun getSelectedDevice(project: Project): IDevice? {
-        val debugBridge = AndroidSdkUtils.getDebugBridge(project) ?: return null
+        val debugBridge = AndroidSdkUtils.getDebugBridge(project) ?:
+                throw IllegalStateException("Couldn't get debug bridge")
 
         return if (debugBridge.devices.size == 1) {
             debugBridge.devices[DEFAULT_DEVICE_INDEX]
         } else {
-            val facet = AndroidUtils.getApplicationFacets(project).getOrNull(DEFAULT_FACET_INDEX) ?: return null
-            val androidTarget = facet.configuration.androidTarget ?: return null
+            val facet = AndroidUtils.getApplicationFacets(project).getOrNull(DEFAULT_FACET_INDEX) ?:
+                    throw IllegalStateException("Couldn't get default application facet")
+            val androidTarget = facet.configuration.androidTarget ?:
+                    throw IllegalStateException("Couldn't get android target for default application facet")
             val deviceChooserDialog = DeviceChooserDialog(facet, androidTarget, false, null, null)
 
             deviceChooserDialog.show()
