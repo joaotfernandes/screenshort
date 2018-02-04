@@ -9,7 +9,9 @@ import com.github.joaotfernandes.notification.NotificationManager
 import com.intellij.notification.NotificationListener
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import org.jetbrains.android.sdk.AndroidSdkUtils
@@ -31,19 +33,10 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
     }
 
     override fun actionPerformed(event: AnActionEvent) {
-        val project = event.project ?: return
-
         try {
-            val device = getSelectedDevice(project)
-            if (device != null) {
-                ApplicationManager.getApplication().executeOnPooledThread {
-                    val dstFile = getDstFile(project)
-                    device.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)?.let {
-                        NotificationManager.dispatchInfoNotification(
-                                Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
-                                notificationListener = NotificationListener.URL_OPENING_LISTENER)
-                    }
-                }
+            val project = event.project ?: return
+            getSelectedDevice(project)?.let {
+                ProgressManager.getInstance().run(SaveScreenshotTask(project, it))
             }
         } catch (throwable: Throwable) {
             // Catch all exceptions that can occur when taking a screenshot and display an error notification
@@ -51,17 +44,6 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
                     Notification.SCREENSHOT_FAILURE.getBody(throwable.message),
                     notificationListener = NotificationListener.URL_OPENING_LISTENER)
         }
-    }
-
-    /**
-     * Gets the destiny [File] where the screenshot will be saved to. The returned [File] path will be the base path
-     * for the Android project with the file being named with the format 'device-yyyy-MM-dd-HHmmss.png'.
-     */
-    private fun getDstFile(project: Project): File {
-        return File(String.format(DST_FILE_NAME_FORMAT,
-                project.basePath,
-                DATE_FORMATTER.format(Date()),
-                SCREENSHOT_IMAGE_FORMAT))
     }
 
     /**
@@ -91,6 +73,39 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
             } else {
                 null
             }
+        }
+    }
+
+    /**
+     * [Task.Backgroundable] that saves a screenshot from the [device] and saves it into a file, displaying progress.
+     */
+    private inner class SaveScreenshotTask(project: Project, private val device: IDevice) :
+            Task.Backgroundable(project, "Capturing screenshot", false) {
+
+        override fun run(progressIndicator: ProgressIndicator) {
+            try {
+                val dstFile = getDstFile(project)
+                device.screenshot?.toFile(SCREENSHOT_IMAGE_FORMAT, BufferedImage.TYPE_INT_ARGB, dstFile)?.let {
+                    NotificationManager.dispatchInfoNotification(
+                            Notification.SCREENSHOT_SUCCESS.getBody(dstFile.absolutePath, dstFile.parent),
+                            notificationListener = NotificationListener.URL_OPENING_LISTENER)
+                }
+            } catch (throwable: Throwable) {
+                NotificationManager.dispatchErrorNotification(
+                        Notification.SCREENSHOT_FAILURE.getBody(throwable.message),
+                        notificationListener = NotificationListener.URL_OPENING_LISTENER)
+            }
+        }
+
+        /**
+         * Gets the destiny [File] where the screenshot will be saved to. The returned [File] path will be the base path
+         * for the Android project with the file being named with the format 'device-yyyy-MM-dd-HHmmss.png'.
+         */
+        private fun getDstFile(project: Project): File {
+            return File(String.format(DST_FILE_NAME_FORMAT,
+                    project.basePath,
+                    DATE_FORMATTER.format(Date()),
+                    SCREENSHOT_IMAGE_FORMAT))
         }
     }
 }
