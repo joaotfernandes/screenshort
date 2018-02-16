@@ -22,6 +22,9 @@
     <actions>
         <action id="TakeScreenshot" class="com.github.joaotfernandes.action.TakeScreenshotAction" text="Take screenshot">
             <add-to-group group-id="AndroidToolsGroup" anchor="last"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="command shift S"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="command shift S"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift S"/>
         </action>
     </actions>
 </idea-plugin>
