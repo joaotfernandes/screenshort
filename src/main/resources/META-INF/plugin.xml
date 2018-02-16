@@ -1,15 +1,28 @@
 <idea-plugin>
     <id>com.github.joaotfernandes</id>
     <name>screenshort</name>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <vendor email="jtfernandes93@gmail.com" url="https://github.com/joaotfernandes">Joao Fernandes</vendor>
 
     <description><![CDATA[
-      TODO.<br>
+        Android Studio plugin that provides a keyboard shortcut and an action to quickly take screenshots of connected Android devices.<br>
+
+        The screenshot can be taken by:
+        <ul>
+            <li>Using a keyboard shortcut (osx: cmd+shift+s, windows/linux: ctrl+shift+s)</li>
+            <li>Using the Take Screenshot action that can be found in the Find Actions menu (osx: cmd+shift+a, windows/linux: ctrl+shift+a)</li>
+            <li>Going to Tools->Android->Take screenshot</li>
+        </ul>
     ]]></description>
 
     <change-notes><![CDATA[
-      Release 1.0: TODO.<br>
+        <b>1.0.0</b>
+        <ul>
+          <li>Take screenshots of connected devices using a shortcut</li>
+          <li>Support for choosing devices when multiple are connected</li>
+          <li>Automatically save screenshots to project directory</li>
+          <li>Possibility to open or reveal a screenshot after it has been taken</li>
+        </ul>
     ]]>
     </change-notes>
 
@@ -18,9 +31,10 @@
     <depends>com.intellij.modules.androidstudio</depends>
     <depends>org.jetbrains.android</depends>
 
-    <extensions defaultExtensionNs="com.intellij" />
+    <extensions defaultExtensionNs="com.intellij"/>
     <actions>
-        <action id="TakeScreenshot" class="com.github.joaotfernandes.action.TakeScreenshotAction" text="Take screenshot">
+        <action id="TakeScreenshot" class="com.github.joaotfernandes.action.TakeScreenshotAction"
+                text="Take screenshot">
             <add-to-group group-id="AndroidToolsGroup" anchor="last"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="command shift S"/>
             <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="command shift S"/>
