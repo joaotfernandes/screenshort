@@ -34,6 +34,7 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
 
     override fun actionPerformed(event: AnActionEvent) {
         try {
+
             val project = event.project ?: return
             getSelectedDevice(project)?.let {
                 ProgressManager.getInstance().run(SaveScreenshotTask(project, it))
@@ -57,7 +58,7 @@ class TakeScreenshotAction : AnAction(ScreenshortIcons.SCREENSHOT_ICON) {
         val debugBridge = AndroidSdkUtils.getDebugBridge(project) ?:
                 throw IllegalStateException("Couldn't get debug bridge")
 
-        return if (debugBridge.devices.size == 1) {
+        return if (debugBridge.devices.size == 1 && debugBridge.devices[DEFAULT_DEVICE_INDEX].isOnline) {
             debugBridge.devices[DEFAULT_DEVICE_INDEX]
         } else {
             val facet = AndroidUtils.getApplicationFacets(project).getOrNull(DEFAULT_FACET_INDEX) ?:
